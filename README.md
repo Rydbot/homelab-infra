@@ -42,6 +42,47 @@ flux -n flux-system reconcile kustomization infrastructure --with-source
 - `secrets/`: SOPS-encrypted Kubernetes Secrets/credentials (`*.enc.yaml`)
 - `ops/`: operational helpers (SQL, image build inputs, WireGuard scripts, etc)
 
+## WotLK server stack
+
+The Wrath server runs as a dedicated stack under `apps/wotlk/`:
+
+- Core services:
+  - `apps/wotlk/worldserver-deployment.yaml`
+  - `apps/wotlk/authserver-deployment.yaml`
+  - `apps/wotlk/mariadb-statefulset.yaml`
+- Server configuration:
+  - `apps/wotlk/worldserver-config.yaml` (templates rendered into `/etc` on startup)
+  - `apps/wotlk/authserver-config.yaml`
+  - `apps/wotlk/acore-source-configmap.yaml` (AzerothCore repo + ref)
+- Modules (playerbots/AH/transmog/etc):
+  - `apps/wotlk/worldserver-config.yaml` contains the module configs (e.g., `mod_ahbot.conf`)
+  - `apps/wotlk/ahbot-cleanup-cronjob.yaml` removes unwanted AH items
+- Maintenance / scheduled jobs:
+  - `apps/wotlk/realm-upsert-cronjob.yaml` (realm address updates)
+  - `apps/wotlk/restart-cronjob.yaml` (scheduled restarts + announcements)
+  - `apps/wotlk/stats-snapshot-cronjob.yaml` (stats snapshots)
+  - `apps/wotlk/playerbots-normalize-ascii-cronjob.yaml`
+  - `apps/wotlk/tokenstore-dailies-cronjob.yaml` (custom daily quest content)
+
+Notes:
+- WotLK pods run on `metal7` and use `hostNetwork` (see `apps/wotlk/worldserver-deployment.yaml`).
+- New images are pushed to GHCR and referenced directly in the deployments.
+- Flux applies changes on push to `main`.
+
+## WotLK admin portal
+
+The account management / admin portal is served by the `accountmgr` sidecar container:
+
+- Portal source lives in `apps/wotlk/accountmgr-configmap.yaml` (inline PHP + assets).
+- Exposed via `apps/wotlk/accountmgr-service.yaml`.
+- Access can be gated with Cloudflare Access and invite codes (see portal env vars and logic in the configmap).
+- Patch download support: the portal can serve a client patch when present under `/client/Data/patch-S.mpq`.
+
+When updating the portal:
+1. Edit `apps/wotlk/accountmgr-configmap.yaml`.
+2. Commit + push to `main`.
+3. Reconcile the WotLK kustomization (or wait for Flux).
+
 ## Secrets (SOPS)
 
 This repo uses Mozilla SOPS with Age to store secrets safely in Git.
@@ -93,4 +134,3 @@ High-level pattern:
 ## Notes
 
 This is a personal homelab repo; manifests are opinionated and tailored to the “home” cluster.
-
