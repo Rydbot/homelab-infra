@@ -56,11 +56,11 @@ spec:
 
                   DUTY_NPC_ALLIANCE="${DUTY_NPC_ALLIANCE:-900100}"
                   DUTY_NPC_HORDE="${DUTY_NPC_HORDE:-900101}"
-                  SW_X="${SW_X:--8787.976}"
-                  SW_Y="${SW_Y:-640.2761}"
-                  SW_Z="${SW_Z:-69.12814}"
-                  SW_O="${SW_O:-3.0963876}"
-                  SW_ZONE="${SW_ZONE:-11519}"
+                  SW_X="${SW_X:--8787.98}"
+                  SW_Y="${SW_Y:-640.276}"
+                  SW_Z="${SW_Z:-69.1281}"
+                  SW_O="${SW_O:-3.09639}"
+                  SW_ZONE="${SW_ZONE:-1519}"
                   SW_AREA="${SW_AREA:-1519}"
                   SW_PHASEMASK="${SW_PHASEMASK:-1}"
                   SW_GUARD_TEMPLATE="${SW_GUARD_TEMPLATE:-1423}" # Stormwind Guard
