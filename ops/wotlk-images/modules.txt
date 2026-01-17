@@ -7,7 +7,7 @@
 
 https://github.com/RovxBot/mod-individual-progression@master
 # Playerbots module (PR #2022)
-https://github.com/mod-playerbots/mod-playerbots@Smart-Loot-System-Refactored-2026
+https://github.com/Wishmaster117/mod-playerbots@Smart-Loot-System-Refactored-2026
 https://github.com/NathanHandley/mod-ah-bot-plus@master
 https://github.com/azerothcore/mod-transmog.git@master
 # NOTE: This repo is NOT a standard AzerothCore "module" (no `src/` module layout).
