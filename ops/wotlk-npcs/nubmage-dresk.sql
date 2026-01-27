@@ -222,7 +222,7 @@ VALUES
   -- GroupID 0: Portal advertisements (yell)
   (@ENTRY_NUBMAGE, 0, 0, 'Nubmage portal service! Best portal service for you!', 14, 0, 100, 0, 0, 0, 0, 0, 'Nubmage ad'),
   (@ENTRY_NUBMAGE, 0, 1, 'Nubmage portal service! Step right up! Ten gold only!', 14, 0, 100, 0, 0, 0, 0, 0, 'Nubmage ad'),
-  (@ENTRY_NUBMAGE, 0, 2, 'Nubmage takes you anywhere! Orgrimmar! Thunder Bluff! Undercity! Silvermoon!', 14, 0, 100, 0, 0, 0, 0, 0, 'Nubmage ad'),
+  (@ENTRY_NUBMAGE, 0, 2, 'Nubmage takes you anywhere! Thunder Bluff! Undercity! Silvermoon!', 14, 0, 100, 0, 0, 0, 0, 0, 'Nubmage ad'),
   -- GroupID 1: Idle trash talk (yell)
   (@ENTRY_NUBMAGE, 1, 0, 'Nubmage sees you. Nubmage is not impressed.', 14, 0, 100, 0, 0, 0, 0, 0, 'Nubmage trash'),
   (@ENTRY_NUBMAGE, 1, 1, 'Nubmage offers portals, and you offer... nothing.', 14, 0, 100, 0, 0, 0, 0, 0, 'Nubmage trash'),
@@ -258,20 +258,6 @@ VALUES
    60000, 90000, 180000, 360000, 0, 0,
    1, 1, 0, 0, 0, 0, 0,
    1, 0, 0, 0, 0, 0, 0, 0, 0, 'Nubmage - OOC - Yell trash lines'),
-
-  -- GOSSIP: Orgrimmar (MenuID 0, OptionID 0) - Player has gold
-  (@ENTRY_NUBMAGE, 0, 10, 11, 62, 0, 100, 0,
-   @ENTRY_NUBMAGE, 0, 0, 0, 0, 0,
-   62, 0, 0, 0, 0, 0, 0,
-   7, 0, 0, 0, 0, 0, 0, 0, 0, 'Nubmage - Gossip Orgrimmar - Close Gossip'),
-  (@ENTRY_NUBMAGE, 0, 11, 12, 61, 0, 100, 0,
-   0, 0, 0, 0, 0, 0,
-   1, 3, 0, 0, 0, 0, 0,
-   1, 0, 0, 0, 0, 0, 0, 0, 0, 'Nubmage - Gossip Orgrimmar - Yell success'),
-  (@ENTRY_NUBMAGE, 0, 12, 0, 61, 0, 100, 0,
-   0, 0, 0, 0, 0, 0,
-   62, 1, 0, 0, 0, 0, 0,
-   7, 0, 0, 0, 0, 1805.70, 342.60, -60.00, 0, 'Nubmage - Gossip Orgrimmar - Teleport'),
 
   -- GOSSIP: Thunder Bluff (MenuID 0, OptionID 1) - Player has gold
   (@ENTRY_NUBMAGE, 0, 20, 21, 62, 0, 100, 0,
@@ -316,14 +302,6 @@ VALUES
    7, 0, 0, 0, 0, 9738.00, -7454.00, 13.60, 0, 'Nubmage - Gossip Silvermoon - Teleport'),
 
   -- GOSSIP: Not enough gold responses (MenuID 0, OptionID 10-13)
-  (@ENTRY_NUBMAGE, 0, 50, 51, 62, 0, 100, 0,
-   @ENTRY_NUBMAGE, 10, 0, 0, 0, 0,
-   62, 0, 0, 0, 0, 0, 0,
-   7, 0, 0, 0, 0, 0, 0, 0, 0, 'Nubmage - Gossip No Gold Org - Close Gossip'),
-  (@ENTRY_NUBMAGE, 0, 51, 0, 61, 0, 100, 0,
-   0, 0, 0, 0, 0, 0,
-   1, 2, 0, 0, 0, 0, 0,
-   1, 0, 0, 0, 0, 0, 0, 0, 0, 'Nubmage - Gossip No Gold Org - Yell sass'),
   (@ENTRY_NUBMAGE, 0, 52, 53, 62, 0, 100, 0,
    @ENTRY_NUBMAGE, 11, 0, 0, 0, 0,
    62, 0, 0, 0, 0, 0, 0,
