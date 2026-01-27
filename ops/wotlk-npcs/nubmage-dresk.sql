@@ -35,10 +35,10 @@ SET @FACTION_ALLIANCE := 11;
 DELETE FROM creature_formations
 WHERE leaderGUID IN (SELECT guid FROM creature WHERE id1 IN (@ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2))
    OR memberGUID IN (SELECT guid FROM creature WHERE id1 IN (@ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2));
-DELETE FROM waypoint_data WHERE id IN (SELECT guid FROM creature WHERE id1 = @ENTRY_DAISH);
-DELETE FROM smart_scripts WHERE entryorguid IN (@ENTRY_NUBMAGE, @ENTRY_DAISH, @ENTRY_HEALER1, @ENTRY_HEALER2) AND source_type = 0;
-DELETE FROM creature_text WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DAISH);
-DELETE FROM creature_equip_template WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DAISH);
+DELETE FROM waypoint_data WHERE id IN (SELECT guid FROM creature WHERE id1 = @ENTRY_DRESK);
+DELETE FROM smart_scripts WHERE entryorguid IN (@ENTRY_NUBMAGE, @ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2) AND source_type = 0;
+DELETE FROM creature_text WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DRESK);
+DELETE FROM creature_equip_template WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DRESK);
 DELETE FROM conditions WHERE SourceTypeOrReferenceId = 15 AND SourceGroup = @ENTRY_NUBMAGE;
 DELETE FROM gossip_menu_option WHERE MenuID = @ENTRY_NUBMAGE;
 DELETE FROM gossip_menu WHERE MenuID = @ENTRY_NUBMAGE;
