@@ -40,7 +40,7 @@ spec:
               mountPath: /src
               readOnly: true
         - name: sync-background
-          image: bitnami/kubectl:latest@sha256:b349e60a6ae2969af84a778c0b976b050a0cc77f4fb6a4ad44307cd0a06e9d8f
+          image: bitnami/kubectl:latest@sha256:87cb8e323d39e28d77cb0745d2352bbc1f2c26c8c1f15c5f4a3ab5f685c23ec1
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 0
@@ -92,7 +92,7 @@ spec:
               mountPath: /work
       containers:
         - name: homepage
-          image: ghcr.io/gethomepage/homepage:v1.9.0@sha256:7fa7b07a26bd8d90a44bb975c6455b10d8dee467ce674b040750ffb4a0f486d6
+          image: ghcr.io/gethomepage/homepage:v1.10.1@sha256:0b596092c0b55fe4c65379a428a3fe90bd192f10d1b07d189a34fe5fabe7eedb
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
