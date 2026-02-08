@@ -14,6 +14,8 @@ SET @ENTRY_NUBMAGE := 4000000;
 SET @ENTRY_DAISH   := 4000001; -- Daish
 SET @ENTRY_HEALER1 := 4000002;
 SET @ENTRY_HEALER2 := 4000003;
+SET @GOSSIP_MENU_NUBMAGE := @ENTRY_NUBMAGE;  -- Use entry as menu ID for simplicity
+SET @NPC_TEXT_NUBMAGE := 4000000;
 
 -- --------------------------------------------------------------------
 -- Reference models (copied from existing templates in your DB)
@@ -33,19 +35,19 @@ SET @FACTION_ALLIANCE := 11;
 -- Cleanup (re-runnable)
 -- --------------------------------------------------------------------
 DELETE FROM creature_formations
-WHERE leaderGUID IN (SELECT guid FROM creature WHERE id1 IN (@ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2))
-   OR memberGUID IN (SELECT guid FROM creature WHERE id1 IN (@ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2));
-DELETE FROM waypoint_data WHERE id IN (SELECT guid FROM creature WHERE id1 = @ENTRY_DRESK);
-DELETE FROM smart_scripts WHERE entryorguid IN (@ENTRY_NUBMAGE, @ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2) AND source_type = 0;
-DELETE FROM creature_text WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DRESK);
-DELETE FROM creature_equip_template WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DRESK);
+WHERE leaderGUID IN (SELECT guid FROM creature WHERE id1 IN (@ENTRY_DAISH, @ENTRY_HEALER1, @ENTRY_HEALER2))
+   OR memberGUID IN (SELECT guid FROM creature WHERE id1 IN (@ENTRY_DAISH, @ENTRY_HEALER1, @ENTRY_HEALER2));
+DELETE FROM waypoint_data WHERE id IN (SELECT guid FROM creature WHERE id1 = @ENTRY_DAISH);
+DELETE FROM smart_scripts WHERE entryorguid IN (@ENTRY_NUBMAGE, @ENTRY_DAISH, @ENTRY_HEALER1, @ENTRY_HEALER2) AND source_type = 0;
+DELETE FROM creature_text WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DAISH);
+DELETE FROM creature_equip_template WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DAISH);
 DELETE FROM conditions WHERE SourceTypeOrReferenceId = 15 AND SourceGroup = @ENTRY_NUBMAGE;
 DELETE FROM gossip_menu_option WHERE MenuID = @ENTRY_NUBMAGE;
 DELETE FROM gossip_menu WHERE MenuID = @ENTRY_NUBMAGE;
-DELETE FROM creature_template_gossip WHERE CreatureID = @ENTRY_NUBMAGE
-DELETE FROM creature WHERE id1 IN (@ENTRY_NUBMAGE, @ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2);
-DELETE FROM creature_template_model WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2);
-DELETE FROM creature_template WHERE entry IN (@ENTRY_NUBMAGE, @ENTRY_DRESK, @ENTRY_HEALER1, @ENTRY_HEALER2);
+-- AzerothCore uses creature_template.gossip_menu_id (no creature_template_gossip table).
+DELETE FROM creature WHERE id1 IN (@ENTRY_NUBMAGE, @ENTRY_DAISH, @ENTRY_HEALER1, @ENTRY_HEALER2);
+DELETE FROM creature_template_model WHERE CreatureID IN (@ENTRY_NUBMAGE, @ENTRY_DAISH, @ENTRY_HEALER1, @ENTRY_HEALER2);
+DELETE FROM creature_template WHERE entry IN (@ENTRY_NUBMAGE, @ENTRY_DAISH, @ENTRY_HEALER1, @ENTRY_HEALER2);
 
 -- Allocate GUIDs dynamically (so the file works on any DB state)
 SET @GUID_BASE := (SELECT IFNULL(MAX(guid), 0) + 1 FROM creature);
@@ -59,12 +61,12 @@ SET @GUID_HEALER2 := @GUID_BASE + 3;
 -- unit_class: 8 = mage/caster, 2 = paladin-ish, 1 = warrior-ish
 -- We keep defaults modest; tune later (damage/health) if you want them tougher.
 -- --------------------------------------------------------------------
-INSERT INTO creature_template (entry, name, subname, minlevel, maxlevel, exp, faction, npcflag, speed_walk, speed_run, scale, `rank`, dmgschool, unit_class, unit_flags, unit_flags2, dynamicflags, type, type_flags, AIName, MovementType, HoverHeight, HealthModifier, ManaModifier, ArmorModifier, ExperienceModifier, RacialLeader, RegenHealth, mechanic_immune_mask, spell_school_immune_mask, flags_extra)
+INSERT INTO creature_template (entry, name, subname, gossip_menu_id, minlevel, maxlevel, exp, faction, npcflag, speed_walk, speed_run, scale, `rank`, dmgschool, unit_class, unit_flags, unit_flags2, dynamicflags, type, type_flags, AIName, MovementType, HoverHeight, HealthModifier, ManaModifier, ArmorModifier, ExperienceModifier, RacialLeader, RegenHealth, mechanic_immune_mask, spell_school_immune_mask, flags_extra)
 VALUES
-  (@ENTRY_NUBMAGE, 'Nubmage', 'Portal Service', 80, 80, 2, @FACTION_HORDE_CITY, 1, 1, 1.14286, 1, 0, 0, 8, 0, 0, 0, 7, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0),
-  (@ENTRY_DAISH,   'Daish',   'Wintergrasp Champion', 60, 60, 1, @FACTION_ALLIANCE, 0, 1, 1.14286, 1, 1, 0, 2, 0, 0, 0, 7, 0, 'SmartAI', 2, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0),
-  (@ENTRY_HEALER1, 'Daish\'s Healer', NULL, 60, 60, 1, @FACTION_ALLIANCE, 0, 1, 1.14286, 1, 0, 0, 8, 0, 0, 0, 7, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0),
-  (@ENTRY_HEALER2, 'Daish\'s Healer', NULL, 60, 60, 1, @FACTION_ALLIANCE, 0, 1, 1.14286, 1, 0, 0, 8, 0, 0, 0, 7, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0);
+  (@ENTRY_NUBMAGE, 'Nubmage', 'Portal Service', @GOSSIP_MENU_NUBMAGE, 80, 80, 2, @FACTION_HORDE_CITY, 1, 1, 1.14286, 1, 0, 0, 8, 0, 0, 0, 7, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0),
+  (@ENTRY_DAISH,   'Daish',   'Wintergrasp Champion', 0, 60, 60, 1, @FACTION_ALLIANCE, 0, 1, 1.14286, 1, 1, 0, 2, 0, 0, 0, 7, 0, 'SmartAI', 2, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0),
+  (@ENTRY_HEALER1, 'Daish\'s Healer', NULL, 0, 60, 60, 1, @FACTION_ALLIANCE, 0, 1, 1.14286, 1, 0, 0, 8, 0, 0, 0, 7, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0),
+  (@ENTRY_HEALER2, 'Daish\'s Healer', NULL, 0, 60, 60, 1, @FACTION_ALLIANCE, 0, 1, 1.14286, 1, 0, 0, 8, 0, 0, 0, 7, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0);
 
 INSERT INTO creature_template_model (CreatureID, Idx, CreatureDisplayID, DisplayScale, Probability)
 VALUES
@@ -331,16 +333,12 @@ VALUES
 -- Nubmage Gossip Menu: Portal destinations (10g each)
 -- Uses conditions to show different options based on player gold
 -- --------------------------------------------------------------------
-SET @GOSSIP_MENU_NUBMAGE := @ENTRY_NUBMAGE;  -- Use entry as menu ID for simplicity
-
 DELETE FROM gossip_menu WHERE MenuID = @GOSSIP_MENU_NUBMAGE;
+DELETE FROM npc_text WHERE ID = @NPC_TEXT_NUBMAGE;
+INSERT INTO npc_text (ID, text0_0, BroadcastTextID0, lang0, Probability0)
+VALUES (@NPC_TEXT_NUBMAGE, 'Yes what is it? Nubmage has many portals to make and very little time!', 0, 0, 1);
 INSERT INTO gossip_menu (MenuID, TextID)
-VALUES (@GOSSIP_MENU_NUBMAGE, 'Yes what is it? Nubmage has many portals to make and very little time!');  -- TextID 1 = generic "Greetings" (or create custom npc_text)
-
--- Link creature to gossip menu
-DELETE FROM creature_template_gossip WHERE CreatureID = @ENTRY_NUBMAGE;
-INSERT INTO creature_template_gossip (CreatureID, MenuID)
-VALUES (@ENTRY_NUBMAGE, @GOSSIP_MENU_NUBMAGE);
+VALUES (@GOSSIP_MENU_NUBMAGE, @NPC_TEXT_NUBMAGE);
 
 -- Gossip options: Cities (shown when player HAS 10g)
 DELETE FROM gossip_menu_option WHERE MenuID = @GOSSIP_MENU_NUBMAGE;
