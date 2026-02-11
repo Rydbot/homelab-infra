@@ -10,6 +10,7 @@ configMapGenerator:
       - mod_ahbot.conf=config/mod_ahbot.conf
       - individualProgression.conf=config/individualProgression.conf
       - transmog.conf=config/transmog.conf
+      - mod_ollama_chat.conf=config/mod_ollama_chat.conf
     options:
       disableNameSuffixHash: false
   - name: wotlk-realmfirst-sql

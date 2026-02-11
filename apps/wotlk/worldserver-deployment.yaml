@@ -58,6 +58,7 @@ spec:
               clone_module "https://github.com/Wishmaster117/mod-playerbots.git" "Smart-Loot-System-Refactored-2026"
               clone_module "https://github.com/NathanHandley/mod-ah-bot-plus.git" "master"
               clone_module "https://github.com/azerothcore/mod-transmog.git" "master"
+              clone_module "https://github.com/DustinHendrickson/mod-ollama-chat.git" "main"
               
           volumeMounts:
             - name: acore-src
@@ -76,6 +77,7 @@ spec:
               envsubst < /etc-tpl/mod_ahbot.conf > /etc-out/modules/mod_ahbot.conf
               envsubst < /etc-tpl/individualProgression.conf > /etc-out/modules/individualProgression.conf
               envsubst < /etc-tpl/transmog.conf > /etc-out/modules/transmog.conf
+              envsubst < /etc-tpl/mod_ollama_chat.conf > /etc-out/modules/mod_ollama_chat.conf
               chmod -R a+rwX /etc-out
           env:
             - name: DB_HOST
