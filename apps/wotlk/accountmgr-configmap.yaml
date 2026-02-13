@@ -393,6 +393,7 @@ data:
           ]
         : [
             'home' => 'Home',
+            'signup' => 'Create Account',
             'announcements' => 'Announcements',
             'forum' => 'Forum',
             'server' => 'Server Info',
@@ -617,6 +618,58 @@ data:
           margin-top: 14px;
           color: #cbb58f;
           font-size: 13px;
+        }
+        .home-stack {
+          max-width: 860px;
+          margin: 14px auto 0;
+          display: grid;
+          gap: 14px;
+        }
+        .auth-card {
+          border: 1px solid rgba(255, 221, 148, .18);
+          border-radius: 12px;
+          background:
+            linear-gradient(180deg, rgba(24, 72, 122, .24), rgba(12, 28, 48, .20)),
+            linear-gradient(180deg, rgba(34, 24, 14, .82), rgba(10, 7, 4, .88));
+          box-shadow: 0 24px 55px rgba(0,0,0,.48);
+          overflow: hidden;
+        }
+        .auth-head {
+          padding: 14px 16px;
+          border-bottom: 1px solid rgba(255, 221, 148, .14);
+        }
+        .auth-head h2 {
+          margin: 0;
+          font-size: 16px;
+          letter-spacing: .3px;
+          color: #ffe7b0;
+          font-family: "Georgia", "Times New Roman", serif;
+        }
+        .auth-head p {
+          margin: 6px 0 0;
+          color: #cbb58f;
+          font-size: 13px;
+        }
+        .auth-form {
+          padding: 14px 16px 16px;
+        }
+        .auth-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        @media (min-width: 700px) {
+          .auth-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+        .auth-actions {
+          margin-top: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          flex-wrap: wrap;
         }
         .panel {
           border: 1px solid rgba(255, 221, 148, .18);
@@ -1574,8 +1627,6 @@ data:
       $realmName = htmlspecialchars((string)($realm['name'] ?? 'Unknown'));
       $realmAddr = htmlspecialchars((string)($realm['address'] ?? ''));
       $realmPort = (int)($realm['port'] ?? 0);
-      $snapshotDate = htmlspecialchars((string)($snap['date'] ?? ''));
-      $snapshotRows = (int)($snap['rows'] ?? 0);
 
       $threadsRows = '';
       foreach ($latestThreads as $t) {
@@ -1591,50 +1642,12 @@ data:
         $threadsRows = '<div class="muted">No threads yet.</div>';
       }
 
-      $signup = '';
-      if (isSignupEnabled()) {
-        $signup = <<<HTML
-        <div id="create-account" class="panel">
-          <div class="hd"><h2>Create Account (Invite)</h2></div>
-          <div class="bd">
-            <form method="post">
-              <input type="hidden" name="csrf" value="{$csrf}" />
-              <input type="hidden" name="action" value="signup" />
-              <label>Username</label>
-              <input name="username" autocomplete="username" required />
-              <label>Password (max 16 chars)</label>
-              <input name="password" type="password" autocomplete="new-password" required />
-              <label>Email</label>
-              <input name="email" type="email" autocomplete="email" required />
-              <label>Invite code</label>
-              <input name="invite" required />
-              <div style="margin-top:12px;">
-                <button class="btn" type="submit">Create account</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        HTML;
-      } else {
-        $signup = <<<HTML
-        <div id="create-account" class="panel">
-          <div class="hd"><h2>Account Creation</h2></div>
-          <div class="bd">
-            <div class="muted">Account creation is currently invite-only. Contact an admin for access.</div>
-          </div>
-        </div>
-        HTML;
-      }
-
       $body = <<<HTML
       <section class="landing">
-        <div class="landing-banner"><img src="/assets/Logo.svg" alt="Grim Guzzler banner logo" /></div>
-        <h2 class="landing-title">Grim Guzzler</h2>
-        <div class="landing-sub">Wrath of the Lich King 3.3.5a</div>
-        <div class="landing-tagline">Community progression realm with account tools, forums, and in-game services in one place.</div>
+        <div class="landing-banner"><img src="/assets/Logo.jpg" alt="Grim Guzzler banner logo" /></div>
         <div class="landing-links">
           <a class="btn" href="/?tab=about#how-to-connect">How to Connect Guide</a>
-          <a class="btn secondary" href="/?tab=home#create-account">Account Creation</a>
+          <a class="btn secondary" href="/?tab=signup">Account Creation</a>
         </div>
         <div class="landing-stats">
           <div class="landing-stat">Players Online<b>{$online}</b></div>
@@ -1643,56 +1656,92 @@ data:
         </div>
         <div class="landing-note">Proudly based on <a href="https://www.azerothcore.org/" target="_blank" rel="noreferrer">AzerothCore</a>, support Open Source</div>
       </section>
-      <div class="grid">
-        <div>
-          <div class="panel">
-            <div class="hd"><h2>Announcements</h2></div>
-            <div class="bd">
-              <div style="margin-top:2px;">{$annLeadHtml}</div>
-              <div style="margin-top:12px;">{$announcementsHtml}</div>
-            </div>
+      <div class="home-stack">
+        <section class="auth-card">
+          <div class="auth-head">
+            <h2>Sign In</h2>
+            <p>Use your game account credentials to access account, character, and store services.</p>
           </div>
-          <div class="panel" style="margin-top:14px;">
-            <div class="hd"><h2>Forum Highlights</h2></div>
-            <div class="bd">
-              <div class="muted" style="margin-bottom: 10px;">Latest threads</div>
-              <div class="forum-grid">{$threadsRows}</div>
-              <div class="muted" style="margin-top:10px;"><a href="/?tab=forum">Visit the forum</a></div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="panel">
-            <div class="hd"><h2>Sign In</h2></div>
-            <div class="bd">
-              <div class="kpi">
-                <div class="card">
-                  <div class="muted">Players online</div>
-                  <div class="val">{$online}</div>
-                </div>
-              </div>
-              <form method="post" style="margin-top:14px;">
-                <input type="hidden" name="csrf" value="{$csrf}" />
-                <input type="hidden" name="action" value="login" />
+          <form method="post" class="auth-form">
+            <input type="hidden" name="csrf" value="{$csrf}" />
+            <input type="hidden" name="action" value="login" />
+            <div class="auth-grid">
+              <div>
                 <label>Account name</label>
                 <input name="login_user" autocomplete="username" required />
+              </div>
+              <div>
                 <label>Password</label>
                 <input name="login_pass" type="password" autocomplete="current-password" required />
-                <div style="margin-top:12px;">
-                  <button class="btn" type="submit">{$iconLogin}Log In</button>
-                </div>
-              </form>
+              </div>
             </div>
-          </div>
-          <div class="panel" style="margin-top:14px;">
-            <div class="hd"><h2>Realm Status</h2></div>
-            <div class="bd">
-              <div><strong>{$realmName}</strong></div>
-              <div class="muted" style="margin-top:6px;">Connect: <span class="pill">{$realmAddr}:{$realmPort}</span></div>
-              <div class="muted" style="margin-top:10px;">Snapshot: <span class="pill">{$snapshotDate}</span> (<span class="pill">{$snapshotRows}</span> rows)</div>
+            <div class="auth-actions">
+              <button class="btn" type="submit">{$iconLogin}Log In</button>
+              <div class="muted">Need an account? <a href="/?tab=signup">Create one</a></div>
             </div>
+          </form>
+        </section>
+        <div class="panel">
+          <div class="hd"><h2>Announcements</h2></div>
+          <div class="bd">
+            <div style="margin-top:2px;">{$annLeadHtml}</div>
+            <div style="margin-top:12px;">{$announcementsHtml}</div>
           </div>
-          {$signup}
+        </div>
+        <div class="panel">
+          <div class="hd"><h2>Forum Highlights</h2></div>
+          <div class="bd">
+            <div class="muted" style="margin-bottom: 10px;">Latest threads</div>
+            <div class="forum-grid">{$threadsRows}</div>
+            <div class="muted" style="margin-top:10px;"><a href="/?tab=forum">Visit the forum</a></div>
+          </div>
+        </div>
+      </div>
+      HTML;
+
+      render($body, $flash, $flashKind);
+    }
+
+    function renderSignupPage(array $realm, string $flash = '', string $flashKind = 'info'): void {
+      $csrf = htmlspecialchars(csrfToken());
+      $realmName = htmlspecialchars((string)($realm['name'] ?? 'Unknown'));
+      $realmAddr = htmlspecialchars((string)($realm['address'] ?? ''));
+      $realmPort = (int)($realm['port'] ?? 0);
+
+      if (isSignupEnabled()) {
+        $form = <<<HTML
+          <form method="post">
+            <input type="hidden" name="csrf" value="{$csrf}" />
+            <input type="hidden" name="action" value="signup" />
+            <label>Username</label>
+            <input name="username" autocomplete="username" required />
+            <label>Password (max 16 chars)</label>
+            <input name="password" type="password" autocomplete="new-password" required />
+            <label>Email</label>
+            <input name="email" type="email" autocomplete="email" required />
+            <label>Invite code</label>
+            <input name="invite" required />
+            <div style="margin-top:12px;">
+              <button class="btn" type="submit">Create account</button>
+            </div>
+          </form>
+        HTML;
+      } else {
+        $form = '<div class="muted">Account creation is currently invite-only. Contact an admin for access.</div>';
+      }
+
+      $body = <<<HTML
+      <div class="home-stack">
+        <div class="panel">
+          <div class="hd"><h2>Create Account</h2></div>
+          <div class="bd">
+            <div class="muted" style="margin-bottom:12px;">Create your Grim Guzzler account. Invite code is required.</div>
+            {$form}
+            <div class="divider"></div>
+            <div class="muted">Realm: <strong>{$realmName}</strong> — <span class="pill">{$realmAddr}:{$realmPort}</span></div>
+            <div class="muted" style="margin-top:10px;"><a href="/?tab=about#how-to-connect">How to connect guide</a></div>
+            <div class="muted" style="margin-top:10px;">Already have an account? <a href="/?tab=home">Sign in</a></div>
+          </div>
         </div>
       </div>
       HTML;
@@ -2448,8 +2497,6 @@ data:
           $cost = (int)$it['cost'];
           $note = htmlspecialchars((string)($it['note'] ?? ''));
 
-          $canBuy = $selected && $disabledNote === '' && $balance >= $cost;
-          $btnDisabled = $canBuy ? '' : 'disabled';
           $affordClass = $balance >= $cost ? '' : ' low';
 
           $storeCards .= '<div class="store-card' . $affordClass . '">' .
@@ -2462,7 +2509,7 @@ data:
             '<input type="hidden" name="guid" value="' . (int)($selected['guid'] ?? 0) . '" />' .
             '<input type="hidden" name="item_id" value="' . $id . '" />' .
             '<span class="pill">Price ' . $cost . '</span>' .
-            '<button class="btn" type="submit" ' . $btnDisabled . '>Buy</button>' .
+            '<button class="btn" type="submit">Buy</button>' .
             '</form></div>';
         }
 
@@ -2795,6 +2842,9 @@ data:
       if (!isLoggedIn()) {
         if ($tab === 'about') {
           renderAboutPage($realm, $flash, $flashKind);
+        }
+        if ($tab === 'signup') {
+          renderSignupPage($realm, $flash, $flashKind);
         }
         if ($tab === 'server') {
           renderServerInfoPage($realm, $flash, $flashKind);
