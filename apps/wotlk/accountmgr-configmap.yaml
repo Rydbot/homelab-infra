@@ -629,6 +629,124 @@ data:
           color: #cbb58f;
           font-size: 13px;
         }
+        .home-shell {
+          max-width: 1040px;
+          margin: 14px auto 0;
+          display: grid;
+          gap: 14px;
+        }
+        .home-hero {
+          position: relative;
+          border-radius: 16px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 192, 104, .36);
+          box-shadow: 0 28px 56px rgba(0,0,0,.52);
+          min-height: 360px;
+        }
+        .home-hero img {
+          width: 100%;
+          height: 100%;
+          min-height: 360px;
+          max-height: 520px;
+          object-fit: cover;
+          display: block;
+          filter: saturate(1.05) contrast(1.02);
+        }
+        .home-hero-scrim {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, rgba(6, 12, 22, .84) 0%, rgba(6, 12, 22, .50) 52%, rgba(6, 12, 22, .74) 100%),
+            linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.62) 100%);
+          pointer-events: none;
+        }
+        .home-hero-content {
+          position: absolute;
+          left: 24px;
+          right: 24px;
+          bottom: 20px;
+          z-index: 2;
+          max-width: 720px;
+        }
+        .home-kicker {
+          display: inline-flex;
+          padding: 6px 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 221, 148, .26);
+          background: rgba(5, 13, 24, .55);
+          color: #ffe7b0;
+          text-transform: uppercase;
+          letter-spacing: .55px;
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .home-hero-content h2 {
+          margin: 10px 0 0;
+          color: #ffe7b0;
+          font-size: clamp(30px, 5vw, 52px);
+          line-height: 1.05;
+          text-shadow: 0 8px 28px rgba(0, 0, 0, .55);
+          font-family: "Georgia", "Times New Roman", serif;
+        }
+        .home-hero-content p {
+          margin: 10px 0 0;
+          max-width: 640px;
+          color: #efe2c1;
+          line-height: 1.6;
+          font-size: 15px;
+        }
+        .home-cta {
+          margin-top: 14px;
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .home-cta .btn {
+          min-width: 180px;
+          box-shadow: 0 10px 24px rgba(0,0,0,.34);
+        }
+        .home-badges {
+          margin-top: 12px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .home-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border-radius: 999px;
+          padding: 6px 10px;
+          border: 1px solid rgba(255, 221, 148, .24);
+          background: rgba(5, 13, 24, .52);
+          color: #d7c6a6;
+          font-size: 12px;
+        }
+        .home-badge b {
+          color: #ffe7b0;
+          font-weight: 700;
+        }
+        .home-note {
+          margin-top: 10px;
+          color: #cbb58f;
+          font-size: 13px;
+        }
+        .home-columns {
+          display: grid;
+          gap: 14px;
+          grid-template-columns: 1fr;
+        }
+        .home-feed {
+          display: grid;
+          gap: 14px;
+          align-content: start;
+        }
+        @media (min-width: 980px) {
+          .home-columns {
+            grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+            align-items: start;
+          }
+        }
         .home-stack {
           max-width: 920px;
           margin: 14px auto 0;
@@ -979,6 +1097,21 @@ data:
           .forum-cell.right { text-align: left; }
           .landing .btn { min-width: 0; width: 100%; }
           .service-actions .btn { width: 100%; }
+          .home-hero {
+            min-height: 300px;
+          }
+          .home-hero img {
+            min-height: 300px;
+          }
+          .home-hero-content {
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+          }
+          .home-cta .btn {
+            min-width: 0;
+            width: 100%;
+          }
           .page-hero.compact {
             grid-template-columns: 1fr;
           }
@@ -1740,60 +1873,67 @@ data:
       }
 
       $body = <<<HTML
-      <section class="landing">
-        <div class="landing-banner"><img src="/assets/Logo.jpg" alt="Grim Guzzler banner logo" /></div>
-        <h2 class="landing-title">Grim Guzzler</h2>
-        <div class="landing-sub">Wrath Of The Lich King • 3.3.5a</div>
-        <div class="landing-tagline">A no pay-to-win WotLK realm with community progression, forum updates, and in-game services in one place.</div>
-        <div class="landing-links">
-          <a class="btn" href="/?tab=about#how-to-connect">How to Connect Guide</a>
-          <a class="btn secondary" href="/?tab=signup">Account Creation</a>
-        </div>
-        <div class="landing-stats">
-          <div class="landing-stat">Players Online<b>{$online}</b></div>
-          <div class="landing-stat">Realm<b>{$realmName}</b></div>
-          <div class="landing-stat">Connect<b>{$realmAddr}:{$realmPort}</b></div>
-        </div>
-        <div class="landing-note">Proudly based on <a href="https://www.azerothcore.org/" target="_blank" rel="noreferrer">AzerothCore</a>, support Open Source</div>
-      </section>
-      <div class="home-stack">
-        <section class="auth-card">
-          <div class="auth-head">
-            <h2>Sign In</h2>
-            <p>Use your game account credentials to access account, character, and store services.</p>
+      <div class="home-shell">
+        <section class="home-hero">
+          <img src="/assets/Logo.jpg" alt="Grim Guzzler banner logo" />
+          <div class="home-hero-scrim"></div>
+          <div class="home-hero-content">
+            <div class="home-kicker">Wrath Of The Lich King • 3.3.5a</div>
+            <h2>Grim Guzzler</h2>
+            <p>A no pay-to-win WotLK realm with community progression, active forums, and in-game services in one place.</p>
+            <div class="home-cta">
+              <a class="btn" href="/?tab=about#how-to-connect">How to Connect Guide</a>
+              <a class="btn secondary" href="/?tab=signup">Create Account</a>
+            </div>
+            <div class="home-badges">
+              <div class="home-badge">Players Online <b>{$online}</b></div>
+              <div class="home-badge">Realm <b>{$realmName}</b></div>
+              <div class="home-badge">Connect <b>{$realmAddr}:{$realmPort}</b></div>
+            </div>
+            <div class="home-note">Proudly based on <a href="https://www.azerothcore.org/" target="_blank" rel="noreferrer">AzerothCore</a>, support Open Source.</div>
           </div>
-          <form method="post" class="auth-form">
-            <input type="hidden" name="csrf" value="{$csrf}" />
-            <input type="hidden" name="action" value="login" />
-            <div class="auth-grid">
-              <div>
-                <label>Account name</label>
-                <input name="login_user" autocomplete="username" required />
-              </div>
-              <div>
-                <label>Password</label>
-                <input name="login_pass" type="password" autocomplete="current-password" required />
-              </div>
-            </div>
-            <div class="auth-actions">
-              <button class="btn" type="submit">{$iconLogin}Enter Portal</button>
-              <div class="muted">Need an account? <a href="/?tab=signup">Create one</a></div>
-            </div>
-          </form>
         </section>
-        <div class="panel">
-          <div class="hd"><h2>Announcements</h2></div>
-          <div class="bd">
-            <div class="home-intro">{$annLeadHtml}</div>
-            <div style="margin-top:12px;">{$announcementsHtml}</div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="hd"><h2>Forum Highlights</h2></div>
-          <div class="bd">
-            <div class="muted" style="margin-bottom: 10px;">Latest threads</div>
-            <div class="forum-grid">{$threadsRows}</div>
-            <div class="muted" style="margin-top:10px;"><a href="/?tab=forum">Visit the forum</a></div>
+        <div class="home-columns">
+          <section class="auth-card">
+            <div class="auth-head">
+              <h2>Sign In</h2>
+              <p>Use your game account credentials to access account, character, and store services.</p>
+            </div>
+            <form method="post" class="auth-form">
+              <input type="hidden" name="csrf" value="{$csrf}" />
+              <input type="hidden" name="action" value="login" />
+              <div class="auth-grid">
+                <div>
+                  <label>Account name</label>
+                  <input name="login_user" autocomplete="username" required />
+                </div>
+                <div>
+                  <label>Password</label>
+                  <input name="login_pass" type="password" autocomplete="current-password" required />
+                </div>
+              </div>
+              <div class="auth-actions">
+                <button class="btn" type="submit">{$iconLogin}Enter Portal</button>
+                <div class="muted">Need an account? <a href="/?tab=signup">Create one</a></div>
+              </div>
+            </form>
+          </section>
+          <div class="home-feed">
+            <div class="panel">
+              <div class="hd"><h2>Announcements</h2></div>
+              <div class="bd">
+                <div class="home-intro">{$annLeadHtml}</div>
+                <div style="margin-top:12px;">{$announcementsHtml}</div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="hd"><h2>Forum Highlights</h2></div>
+              <div class="bd">
+                <div class="muted" style="margin-bottom: 10px;">Latest threads</div>
+                <div class="forum-grid">{$threadsRows}</div>
+                <div class="muted" style="margin-top:10px;"><a href="/?tab=forum">Visit the forum</a></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
