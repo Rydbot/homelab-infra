@@ -43,7 +43,7 @@ spec:
                   - -lc
                   - |
                     for i in $(seq 1 30); do
-                      ollama pull qwen2.5:1.5b && exit 0
+                      ollama pull artifish/llama3.2-uncensored:latest && exit 0
                       sleep 2
                     done
                     exit 1
