@@ -79,6 +79,7 @@ spec:
               envsubst < /etc-tpl/individualProgression.conf > /etc-out/modules/individualProgression.conf
               envsubst < /etc-tpl/transmog.conf > /etc-out/modules/transmog.conf
               envsubst < /etc-tpl/mod_ollama_chat.conf > /etc-out/modules/mod_ollama_chat.conf
+              envsubst < /etc-tpl/mod-double-xp-weekend.conf > /etc-out/modules/mod-double-xp-weekend.conf
               chmod -R a+rwX /etc-out
           env:
             - name: DB_HOST
