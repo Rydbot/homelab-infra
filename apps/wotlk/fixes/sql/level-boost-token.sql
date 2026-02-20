@@ -40,7 +40,7 @@ SELECT DISTINCT
   1,
   1,
   'Sands of Infinite Wisdom'
--- Please check this enitre section to make sure that it is dropping correctly and excluded from dungeons
+-- Please check this entire section to make sure that it is dropping correctly and excluded from dungeons
 FROM instance_id ie
 JOIN creature_template ct ON ct.entry = ie.creditEntry
 WHERE ie.lastEncounterDungeon != 0
