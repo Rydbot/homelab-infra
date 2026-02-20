@@ -57,7 +57,6 @@ ON DUPLICATE KEY UPDATE
   MinCount = VALUES(MinCount),
   MaxCount = VALUES(MaxCount),
   Comment = VALUES(Comment);
-  
   -- Sanity check: ensure the item exists.
 SELECT 'boost_token_item' AS k, COUNT(*) AS v 
 FROM item_template 
