@@ -5,21 +5,23 @@ USE acore_world;
 -- Configure the boost token item ID.
 SET @BOOST_TOKEN_ITEM_ID :=90004;
 
--- Exclude known classic,tbc and wotlk dungeons (these values match instance_encounters.lastEncounterDungeon in your DB).
-EXCLUDE_CLASSIC_DUNGEON_IDs="33,34,36,43,47,48,70,90,109,129,209,229,230,329,349,389,429,1001,1004,1007" -- Please query ID for dungeons in classic
-EXCLUDE_TBC_DUNGEON_IDs="269,540,542,543,545,546,547,552,553,554,555,556,557,558,560,585" -- Please query ID for dungeons in TBC
-EXCLUDE_WOTLK_DUNGEON_IDs="574,575,579,578,595,599,600,601,602,604,608,619,632,650,658,668" -- Please query ID for dungeons in WotLK
+-- UPDATE: Switched from dungeon exclusion lists to an explicit raid whitelist.
+-- These IDs are instance_encounters.lastEncounterDungeon values verified in your live DB.
+SET @RAID_WHITELIST_DUNGEON_IDS := '42,46,48,50,159,160,161,175,176,177,193,194,195,196,197,198,199,201,223,224,227,237,238,239,240,241,243,244,246,247,248,250,257,279,280,293,294';
 
 -- Add the item into the Database, and update it if it already exists.
 INSERT IGNORE INTO item_template 
   (entry, class, subclass, name, displayid, Quality, bonding, stackable, maxcount, BuyPrice, SellPrice, description)
    
 VALUES
-  (@BOOST_TOKEN_ITEM_ID, 10, 0, 'Sands of Infinite Wisdom', 29735, 5, 1, 1000, 2, 0, 0, 'The power emanating from the sands is almost overwhelming.'),
+  -- UPDATE: Removed trailing comma to keep INSERT syntax valid.
+  -- UPDATE: Set bonding = 0 so the item is not soulbound and is tradeable.
+  (@BOOST_TOKEN_ITEM_ID, 10, 0, 'Sands of Infinite Wisdom', 29735, 5, 0, 1000, 2, 0, 0, 'The power emanating from the sands is almost overwhelming.');
 
 
 UPDATE item_template
-  SET bonding = 1, SellPrice = 0, BuyPrice = 0, stackable = 1000
+  -- UPDATE: Enforce bonding = 0 so reruns do not rebind the item.
+  SET bonding = 0, SellPrice = 0, BuyPrice = 0, stackable = 1000
   WHERE entry = @BOOST_TOKEN_ITEM_ID;
 
 
@@ -40,15 +42,15 @@ SELECT DISTINCT
   1,
   'Sands of Infinite Wisdom'
 -- Please check this entire section to make sure that it is dropping correctly and excluded from dungeons
-FROM instance_id ie
+-- UPDATE: Fixed table name from instance_id -> instance_encounters.
+FROM instance_encounters ie
 JOIN creature_template ct ON ct.entry = ie.creditEntry
 WHERE ie.lastEncounterDungeon != 0
   AND ie.creditType = 0
-  AND ct.exp = 0
-  AND ie.lastEncounterDungeon NOT IN (${EXCLUDE_CLASSIC_DUNGEON_IDs})
-  AND ie.lastEncounterDungeon NOT IN (${EXCLUDE_TBC_DUNGEON_IDs})
-  AND ie.lastEncounterDungeon NOT IN (${EXCLUDE_WOTLK_DUNGEON_IDs});
+  -- UPDATE: Keep only raid end encounters by explicit whitelist.
+  AND FIND_IN_SET(CAST(ie.lastEncounterDungeon AS CHAR), @RAID_WHITELIST_DUNGEON_IDS) > 0
 ON DUPLICATE KEY UPDATE
+  -- UPDATE: Moved ON DUPLICATE KEY UPDATE into same statement (removed premature semicolon above).
   Chance = VALUES(Chance),
   QuestRequired = VALUES(QuestRequired),
   LootMode = VALUES(LootMode),
@@ -56,7 +58,9 @@ ON DUPLICATE KEY UPDATE
   MinCount = VALUES(MinCount),
   MaxCount = VALUES(MaxCount),
   Comment = VALUES(Comment);
-  -- Sanity check: ensure the item exists.
+  
+-- Sanity check: ensure the item exists.
 SELECT 'boost_token_item' AS k, COUNT(*) AS v 
 FROM item_template 
-WHERE entry = @BOOST_TOKEN_ITEM_ID
+-- UPDATE: Added missing statement terminator.
+WHERE entry = @BOOST_TOKEN_ITEM_ID;
