@@ -15,7 +15,6 @@ INSERT IGNORE INTO item_template
   (entry, class, subclass, name, displayid, Quality, bonding, stackable, maxcount, BuyPrice, SellPrice, description)
    
 VALUES
-
   (@BOOST_TOKEN_ITEM_ID, 10, 0, 'Sands of Infinite Wisdom', 29735, 5, 1, 1000, 2, 0, 0, 'The power emanating from the sands is almost overwhelming.'),
 
 
