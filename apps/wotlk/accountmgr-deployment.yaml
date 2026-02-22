@@ -109,6 +109,10 @@ spec:
               value: "RovxBot/homelab-infra"
             - name: PORTAL_GITHUB_BRANCH
               value: "main"
+            - name: BOOST_TOKEN_ITEM_ID
+              value: "90004"
+            - name: STORE_LEVEL_60_BOOST_COST
+              value: "1"
           ports:
             - name: http
               containerPort: 8088
