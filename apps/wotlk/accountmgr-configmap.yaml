@@ -1741,9 +1741,23 @@ data:
       return (int)envOrDefault('STORE_TOKEN_ITEM_ID', '90000');
     }
 
+    function boostTokenItemId(): int {
+      return (int)envOrDefault('BOOST_TOKEN_ITEM_ID', '90004');
+    }
+
     function storeItems(): array {
       // Extend this list with more vanity items as needed.
       return [
+        [
+          'id' => 90006000,
+          'name' => 'Level 60 Character Boost',
+          'cost' => (int)envOrDefault('STORE_LEVEL_60_BOOST_COST', '1'),
+          'cat' => 'services',
+          'note' => 'Boosts the selected offline character to level 60. Uses Sands of Infinite Wisdom.',
+          'kind' => 'service',
+          'service' => 'level60_boost',
+          'currency' => 'sands',
+        ],
         ['id' => 54811, 'name' => 'Celestial Steed', 'cost' => 1500, 'cat' => 'mounts', 'note' => 'Flying mount (vanity).'],
         ['id' => 49284, 'name' => 'Swift Spectral Tiger', 'cost' => 1500, 'cat' => 'mounts', 'note' => 'Ground mount (vanity).'],
         ['id' => 49283, 'name' => 'Spectral Tiger', 'cost' => 150, 'cat' => 'mounts', 'note' => 'Ground mount (vanity).'],
@@ -1805,6 +1819,7 @@ data:
     function storeCategoryLabels(): array {
       return [
         'all' => 'All',
+        'services' => 'Services',
         'mounts' => 'Mounts',
         'pets' => 'Pets',
         'toys' => 'Toys',
@@ -1820,23 +1835,25 @@ data:
       return (bool)$stmt->fetchColumn();
     }
 
-    function tokenCount(PDO $pdo, int $charGuid): int {
+    function tokenCountByItem(PDO $pdo, int $charGuid, int $itemEntry): int {
       $charDb = dbName('DB_CHAR_DB', 'acore_characters');
-      $tokenId = storeTokenItemId();
       $stmt = $pdo->prepare(
         "SELECT COALESCE(SUM(ii.count), 0) AS c " .
         "FROM {$charDb}.character_inventory ci " .
         "JOIN {$charDb}.item_instance ii ON ii.guid = ci.item " .
         "WHERE ci.guid = :g AND ii.itemEntry = :e"
       );
-      $stmt->execute([':g' => $charGuid, ':e' => $tokenId]);
+      $stmt->execute([':g' => $charGuid, ':e' => $itemEntry]);
       return (int)$stmt->fetchColumn();
     }
 
-    function deductTokens(PDO $pdo, int $charGuid, int $amount): void {
+    function tokenCount(PDO $pdo, int $charGuid): int {
+      return tokenCountByItem($pdo, $charGuid, storeTokenItemId());
+    }
+
+    function deductTokensByItem(PDO $pdo, int $charGuid, int $itemEntry, int $amount): void {
       if ($amount <= 0) return;
       $charDb = dbName('DB_CHAR_DB', 'acore_characters');
-      $tokenId = storeTokenItemId();
 
       $stmt = $pdo->prepare(
         "SELECT ii.guid, ii.count " .
@@ -1845,7 +1862,7 @@ data:
         "WHERE ci.guid = :g AND ii.itemEntry = :e " .
         "ORDER BY ii.count DESC, ii.guid ASC"
       );
-      $stmt->execute([':g' => $charGuid, ':e' => $tokenId]);
+      $stmt->execute([':g' => $charGuid, ':e' => $itemEntry]);
       $rows = $stmt->fetchAll();
 
       $remaining = $amount;
@@ -1871,6 +1888,21 @@ data:
 
       if ($remaining > 0) {
         throw new RuntimeException("Insufficient tokens.");
+      }
+    }
+
+    function deductTokens(PDO $pdo, int $charGuid, int $amount): void {
+      deductTokensByItem($pdo, $charGuid, storeTokenItemId(), $amount);
+    }
+
+    function applyLevelBoost(PDO $pdo, int $guid, int $targetLevel): void {
+      $charDb = dbName('DB_CHAR_DB', 'acore_characters');
+      $stmt = $pdo->prepare(
+        "UPDATE {$charDb}.characters SET level = :lvl, xp = 0 WHERE guid = :g AND level < :lvl"
+      );
+      $stmt->execute([':lvl' => $targetLevel, ':g' => $guid]);
+      if ($stmt->rowCount() < 1) {
+        throw new RuntimeException("Character is already level {$targetLevel} or higher.");
       }
     }
 
@@ -2899,12 +2931,14 @@ data:
 
         $selector = '<div class="muted">Select a character to view token balance.</div>';
         $balance = 0;
+        $sandsBalance = 0;
         $disabledNote = '';
         if ($selected) {
           $charNameRaw = (string)$selected['name'];
           $isOnline = (int)$selected['online'] === 1;
           $isBot = isBotCharacter($pdo, $charNameRaw);
           $balance = tokenCount($pdo, (int)$selected['guid']);
+          $sandsBalance = tokenCountByItem($pdo, (int)$selected['guid'], boostTokenItemId());
 
           $selector = '<form method="get" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' .
             '<input type="hidden" name="tab" value="store" />' .
@@ -2961,24 +2995,29 @@ data:
           $cost = (int)$it['cost'];
           $note = htmlspecialchars((string)($it['note'] ?? ''));
           $noteRaw = (string)($it['note'] ?? '');
+          $kind = (string)($it['kind'] ?? 'item');
+          $currency = strtolower((string)($it['currency'] ?? 'grim'));
+          $currencyLabel = $currency === 'sands' ? 'Sands' : 'Grim Tokens';
+          $available = $currency === 'sands' ? $sandsBalance : $balance;
 
           if ($queryLc !== '' && strpos(strtolower($nameRaw . ' ' . $noteRaw), $queryLc) === false) {
             continue;
           }
 
-          $affordClass = $balance >= $cost ? '' : ' low';
+          $affordClass = $available >= $cost ? '' : ' low';
           $visibleCount++;
+          $entryPill = $kind === 'service' ? '<span class="pill">Service</span>' : ('<span class="pill">Item ' . $id . '</span>');
 
           $storeCards .= '<div class="store-card' . $affordClass . '">' .
             '<div class="store-title">' . $name . '</div>' .
-            '<div class="service-meta"><span class="pill">Item ' . $id . '</span><span class="pill">' . htmlspecialchars($categoryLabels[$cat]) . '</span><span class="pill">Cost ' . $cost . '</span></div>' .
+            '<div class="service-meta">' . $entryPill . '<span class="pill">' . htmlspecialchars($categoryLabels[$cat]) . '</span><span class="pill">Cost ' . $cost . ' ' . htmlspecialchars($currencyLabel) . '</span></div>' .
             '<div class="store-note">' . $note . '</div>' .
             '<form method="post" class="store-buy">' .
             '<input type="hidden" name="csrf" value="' . $csrf . '" />' .
             '<input type="hidden" name="action" value="store_purchase" />' .
             '<input type="hidden" name="guid" value="' . (int)($selected['guid'] ?? 0) . '" />' .
             '<input type="hidden" name="item_id" value="' . $id . '" />' .
-            '<span class="pill">Price ' . $cost . '</span>' .
+            '<span class="pill">Price ' . $cost . ' ' . htmlspecialchars($currencyLabel) . '</span>' .
             '<button class="btn" type="submit">Buy</button>' .
             '</form></div>';
         }
@@ -2990,11 +3029,12 @@ data:
           {$selector}
           <div class="kpi" style="margin-top:12px;">
             <div class="card"><div class="muted">Grim Tokens</div><div class="val">{$balance}</div></div>
+            <div class="card"><div class="muted">Sands of Infinite Wisdom</div><div class="val">{$sandsBalance}</div></div>
           </div>
           {$disabledNote}
           <div class="store-tabs">{$tabLinks}</div>
           {$searchBox}
-          <div class="muted" style="margin-top:14px;">Purchases are delivered via in-game mail. Offline characters only.</div>
+          <div class="muted" style="margin-top:14px;">Item purchases are delivered via in-game mail. Services apply directly to the selected character. Offline characters only.</div>
           <div class="muted" style="margin-top:4px;">Showing {$visibleCount} item(s).</div>
           <div class="store-grid">{$storeCards}</div>
         HTML;
@@ -3287,7 +3327,12 @@ data:
           if (empty($catalog[$itemId])) {
             throw new RuntimeException("Unknown store item.");
           }
-          $cost = (int)$catalog[$itemId]['cost'];
+          $entry = $catalog[$itemId];
+          $cost = (int)$entry['cost'];
+          $kind = (string)($entry['kind'] ?? 'item');
+          $service = (string)($entry['service'] ?? '');
+          $currency = strtolower((string)($entry['currency'] ?? 'grim'));
+          $currencyItemId = $currency === 'sands' ? boostTokenItemId() : storeTokenItemId();
 
           $char = characterBelongsTo($pdo, currentAccountId(), $guid);
           if ((int)$char['online'] === 1) {
@@ -3300,22 +3345,34 @@ data:
 
           $pdo->beginTransaction();
           try {
-            $bal = tokenCount($pdo, $guid);
+            $bal = tokenCountByItem($pdo, $guid, $currencyItemId);
             if ($bal < $cost) {
-              throw new RuntimeException("Not enough tokens.");
+              throw new RuntimeException("Not enough currency.");
             }
-            deductTokens($pdo, $guid, $cost);
+            deductTokensByItem($pdo, $guid, $currencyItemId, $cost);
+
+            if ($kind === 'service') {
+              if ($service === 'level60_boost') {
+                applyLevelBoost($pdo, $guid, 60);
+              } else {
+                throw new RuntimeException("Unknown service.");
+              }
+            }
+
             $pdo->commit();
           } catch (Throwable $e) {
             if ($pdo->inTransaction()) $pdo->rollBack();
             throw $e;
           }
 
-          $subject = 'Grim Token Store';
-          $body = 'Thanks for supporting the realm. Enjoy!';
-          soapExecute('send items ' . $charName . ' "' . $subject . '" "' . $body . '" ' . $itemId . ':1');
-
-          $flash = "Purchase delivered to {$charName}.";
+          if ($kind === 'service' && $service === 'level60_boost') {
+            $flash = "{$charName} has been boosted to level 60.";
+          } else {
+            $subject = 'Grim Token Store';
+            $body = 'Thanks for supporting the realm. Enjoy!';
+            soapExecute('send items ' . $charName . ' "' . $subject . '" "' . $body . '" ' . $itemId . ':1');
+            $flash = "Purchase delivered to {$charName}.";
+          }
           $flashKind = 'ok';
         } elseif ($action !== '') {
           throw new RuntimeException("Unknown action.");
