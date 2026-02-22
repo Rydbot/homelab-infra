@@ -10,4 +10,4 @@ spec:
   retain: 2
   concurrency: 1
   groups:
-    - default
+    - system-backup
